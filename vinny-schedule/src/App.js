@@ -310,6 +310,7 @@ class OptionMenu extends React.Component {
 
     //Reset the rest of the form.
     event.target.reset();
+    window.location.reload();
     event.preventDefault();
   }
 
