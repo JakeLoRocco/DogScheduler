@@ -81,8 +81,8 @@
   position: absolute;
   font-size: calc(2vmin);
   text-align: center;
-  top: 29px;
-  left: 708px;
+  /* top: 29px;
+  left: 708px; */
   margin: 0 auto;
 }
 

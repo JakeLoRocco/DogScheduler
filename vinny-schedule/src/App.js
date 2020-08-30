@@ -24,6 +24,7 @@ class Schedule extends React.Component {
     super(props);
 
     this.state = {
+      lastSunday: null,
       logs: null
     };
   }
@@ -33,9 +34,10 @@ class Schedule extends React.Component {
     getSchedule()
       .then( res => res.json() )
       .then( result => {
-
-        this.setState( {logs: result} );
-        console.log(this.state.logs);
+        this.setState( //NEED TO CHANGE THIS TO BE A SINGLE OBJECt not LAStSUNDAY AND LOGS BECAUSE IT IS UPDATING BEFORE LASTSUNDAY GETS UPDATED.
+          {
+            logs: result.entries
+          } );
       });
   }
   //Display it too. Probably by using child components.
@@ -43,26 +45,15 @@ class Schedule extends React.Component {
   //Second component creates the overlays given the action object (can line up directly or dynamically)
 
   render() {
-//<OverlayActions logs ={this.state.logs} />
     return(
       <div className="schedule" style={{position: 'relative'}}>
         <BaseTable />
-        <div className="scheduleSlot">🍖🔫💩🚶🏻‍♂️☀️🌙</div>
+        <OverlayActions logs ={this.state.logs} />
       </div>
     );
   }
 }
 
-/*
-Columns, Pixels
-Sunday, 74
-Monday, 178
-Tuesday, 282
-Wednesday, 388
-Thursday, 496
-Friday, 602
-Saturday, 708
-*/
 
 class OverlayActions extends React.Component {
 
@@ -70,23 +61,67 @@ class OverlayActions extends React.Component {
     let dayStyle = [74, 178, 282, 388, 496, 602, 708]; //Pixels //Move to the schedule slot?
 
     const logs = this.props.logs;
-
-    const slots = logs.map( (log) => (
-      
-      //Need to figure out how to determine the column of the current day...
-      <ScheduleSlot key={"slot" + log.timestamp} />
-    ));
+    const lastSunday = getLastSunday();
     
+    let slots = null;
+
+    if( logs !== null ) { 
+      
+      slots = logs.map( (log) => (
+        
+        //Need to figure out how to determine the column of the current day...
+        <ScheduleSlot key={"slot" + log.timestamp} dayPx={dayStyle} sunday={new Date(lastSunday)} event={log} />
+      ));
+    }
+
     return(
-      <div></div>
+      <div>{slots ? slots : 'loading'}</div>
     );
   }
 }
 
 function ScheduleSlot(props) {
+  
+  const currentDayTime = new Date(props.event.timestamp);
+  
+  let lastSunday = props.sunday; //Date Object.
+  let dateNum = lastSunday.getDate();
+
+  let daysPastSun = 0;
+  while( currentDayTime.toLocaleDateString() !== lastSunday.toLocaleDateString() ) {
+    lastSunday.setDate(++dateNum);
+    daysPastSun++;
+  }
+
+  //If top position doesn't work out very well, can always do it as a percentage of the height.
+  //Calculate the top position.
+  const topBasePx = 31;
+  const hoursPx = (currentDayTime.getHours() - 4) * 4 * 31;
+  const minsPx = (currentDayTime.getMinutes() / 60) * 4 * 29;
+  const topPosition = (topBasePx + hoursPx + minsPx) + 'px';
+
+  //Left px Poisition.
+  const leftPosition = props.dayPx[daysPastSun];
+  
+  //Variables for the emoji text.
+  const ate = (props.event.ate == 'true' ? true : false);
+  const peed = (props.event.peed == 'true' ? true : false);
+  const pooped = (props.event.pooped == 'true' ? true : false);
+  const slept = (props.event.slept == 'true' ? true : false);
+  const walked = (props.event.walked == 'true' ? true : false);
+  const woke = (props.event.woke == 'true' ? true : false);
+
+  //🍖🔫💩🚶🏻‍♂️☀️🌙
 
   return(
-    <div></div>
+    <div className="scheduleSlot" style={{left: leftPosition, top: topPosition}}>
+    {ate ? '🍖' : '\u00A0'}
+    {peed ? '🔫' : '\u00A0'}
+    {pooped ? '💩' : '\u00A0'}
+    {slept ? '🚶🏻‍♂️' : '\u00A0'}
+    {walked ? '☀️' : '\u00A0'}
+    {woke ? '🌙' : '\u00A0'}
+    </div>
   );
 }
 
@@ -385,6 +420,29 @@ function getTimes() {
   }
 
   return times;
+}
+
+function getLastSunday( givenDate = null ) {
+  let currentDate = givenDate;
+
+  if(currentDate === null) {
+      currentDate = new Date(); //Sets it to today.
+  }
+
+  let dateNum = currentDate.getDate();
+  let dayName = currentDate.toDateString().substr(0,3); //Find best way to get day of week.
+
+  while(dayName !== "Sun" ) {
+      currentDate.setDate(--dateNum);
+      dayName = currentDate.toDateString().substr(0,3);
+  }
+
+  currentDate.setMilliseconds(0);
+  currentDate.setSeconds(0);
+  currentDate.setMinutes(0);
+  currentDate.setHours(3);
+
+  return currentDate;
 }
 
 export default App;

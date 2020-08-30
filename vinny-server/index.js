@@ -96,15 +96,15 @@ app.get('/actions', (req, res) => {
 
     const lastSunday = getLastSunday(); //Returns a string.
 
-    const timeQuery = getTimeQuery(lastSunday) ;
+    const timeQuery = getTimeQuery(lastSunday.toLocaleString()) ;
 
     db.find(timeQuery, function(err, result) {
         if (err) {
           throw err;
         }
 
-        //add the last sunday's date to the json?
-        res.json(result.docs);
+        //Adds the lastSunday to the results.
+        res.json( {sunday: lastSunday, entries: result.docs} );
     });
 
 });
@@ -191,9 +191,9 @@ function getLastSunday( givenDate = null ) {
     currentDate.setMilliseconds(0);
     currentDate.setSeconds(0);
     currentDate.setMinutes(0);
-    currentDate.setHours(3);
+    currentDate.setHours(1);
 
-    return currentDate.toLocaleString();
+    return currentDate;
 }
 
 app.listen(5000, () => {
