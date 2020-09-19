@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+
 //Cloudant Stuff.
 const Cloudant = require("@cloudant/cloudant");
 const username = process.env.cloudant_username;
@@ -100,11 +101,14 @@ app.get('/actions', (req, res) => {
 
     db.find(timeQuery, function(err, result) {
         if (err) {
-          throw err;
+          console.log(err);
+          res.json( {sunday: lastSunday, entries: "no entries"} );
+        } else {
+            //Adds the lastSunday to the results.
+            res.json( {sunday: lastSunday, entries: result.docs} );
         }
 
-        //Adds the lastSunday to the results.
-        res.json( {sunday: lastSunday, entries: result.docs} );
+       
     });
 
 });
@@ -196,7 +200,7 @@ function getLastSunday( givenDate = null ) {
     return currentDate;
 }
 
-app.listen(5000, () => {
+app.listen( process.env.PORT || 5000, () => {
     console.log(url);
     console.log('Listening on http://localhost:5000');
 })

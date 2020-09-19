@@ -2,7 +2,8 @@ import React from 'react';
 
 import './App.css';
 
-const API_URL = 'http://localhost:5000/actions';
+const API_URL = "https://vinny-scheduler-server.herokuapp.com/actions";
+//if running locally "http://localhost:5000/actions";
 
 function App() {
   
@@ -56,7 +57,7 @@ class Schedule extends React.Component {
 
 
 class OverlayActions extends React.Component {
-
+  
   render() {
     let dayStyle = [74, 178, 282, 388, 496, 602, 708]; //Pixels //Move to the schedule slot?
 
@@ -65,7 +66,7 @@ class OverlayActions extends React.Component {
     
     let slots = null;
 
-    if( logs !== null ) { 
+    if( logs !== null && logs !== "no entries") { 
       
       slots = logs.map( (log) => (
         
@@ -104,12 +105,12 @@ function ScheduleSlot(props) {
   const leftPosition = props.dayPx[daysPastSun];
   
   //Variables for the emoji text.
-  const ate = (props.event.ate == 'true' ? true : false);
-  const peed = (props.event.peed == 'true' ? true : false);
-  const pooped = (props.event.pooped == 'true' ? true : false);
-  const slept = (props.event.slept == 'true' ? true : false);
-  const walked = (props.event.walked == 'true' ? true : false);
-  const woke = (props.event.woke == 'true' ? true : false);
+  const ate = (props.event.ate === 'true' ? true : false);
+  const peed = (props.event.peed === 'true' ? true : false);
+  const pooped = (props.event.pooped === 'true' ? true : false);
+  const slept = (props.event.slept === 'true' ? true : false);
+  const walked = (props.event.walked === 'true' ? true : false);
+  const woke = (props.event.woke === 'true' ? true : false);
 
   //🍖🔫💩🚶🏻‍♂️☀️🌙
 
@@ -118,9 +119,9 @@ function ScheduleSlot(props) {
     {ate ? '🍖' : '\u00A0'}
     {peed ? '🔫' : '\u00A0'}
     {pooped ? '💩' : '\u00A0'}
-    {slept ? '🚶🏻‍♂️' : '\u00A0'}
-    {walked ? '☀️' : '\u00A0'}
-    {woke ? '🌙' : '\u00A0'}
+    {slept ? '🌙' : '\u00A0'}
+    {walked ? '🚶🏻‍♂️' : '\u00A0'}
+    {woke ? '☀️' : '\u00A0'}
     </div>
   );
 }
@@ -176,6 +177,7 @@ function BaseRow(props){
         (props.time.getMinutes() < 10 ? '0' + props.time.getMinutes() : props.time.getMinutes() )
       }
       </td>
+      <td /><td /><td /><td /><td /><td /><td />
     </tr>
   );
 }
@@ -270,7 +272,7 @@ class OptionMenu extends React.Component {
     this.setState( {slept: !alreadySlept} );
   }
 
-  handleSubmit(event) {
+  async handleSubmit(event) {
     //Process and validate the time.
     const formData = new FormData(event.target);
     let timestamp = new Date(); //Info events are always from the current day.
@@ -296,8 +298,9 @@ class OptionMenu extends React.Component {
       timestamp: timestamp.toLocaleString()
       
     }
+    
     sendActions(status);
-
+  
     //Reset the VinnyAction buttons.
     this.setState({
       ate: false,
@@ -310,7 +313,8 @@ class OptionMenu extends React.Component {
 
     //Reset the rest of the form.
     event.target.reset();
-    window.location.reload();
+
+    //window.location.reload();
     event.preventDefault();
   }
 
@@ -388,15 +392,16 @@ async function sendActions( actions ) {
   });
 
   if( !response.ok ){
-      console.log('error in posting actions.');
+    //console.log('error in posting actions.');
   } else {
-    console.log('successful.');
+    //console.log('successful.');
   }
 
-  const json = await response.json();
-
-  console.log(json);
-  console.log(json.timestamp);
+  //const json = 
+  await response.json();
+  
+  //console.log(json);
+  //console.log(json.timestamp);
 }
 
 function getTimes() {
